@@ -1,0 +1,31 @@
+{
+	"schemaVersion": 1,
+	"id": "moresettingsmod",
+	"version": "${version}",
+	"name": "More Settings Mod",
+	"description": "Adds a Full Settings menu to Minecraft with every setting organized and searchable.",
+	"authors": [
+		"Meellowamg"
+	],
+	"contact": {
+		"homepage": "",
+		"sources": ""
+	},
+	"license": "MIT",
+	"icon": "assets/moresettingsmod/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"net.meellowamg.moresettingsmod.MoreSettingsModClient"
+		]
+	},
+	"mixins": [
+		"moresettingsmod.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": ">=26.2",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
