@@ -1,11 +1,9 @@
 {
 	"required": true,
 	"package": "net.meellowamg.moresettingsmod.mixin",
-	"compatibilityLevel": "JAVA_25",
+	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"MixinPauseScreen"
 	],
-	"injectors": {
-		"defaultRequire": 1
-	}
+	"injectors": { "defaultRequire": 1 }
 }

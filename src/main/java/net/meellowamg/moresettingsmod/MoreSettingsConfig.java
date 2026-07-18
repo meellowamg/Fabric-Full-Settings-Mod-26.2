@@ -17,16 +17,13 @@ public class MoreSettingsConfig {
             .getConfigDir().resolve("moresettingsmod.json");
 
     // Sound
-    public float masterVolume   = 1.0f;
-    public float musicVolume    = 1.0f;
-    public float recordVolume   = 1.0f;
-    public float weatherVolume  = 1.0f;
-    public float blockVolume    = 1.0f;
-    public float hostileVolume  = 1.0f;
-    public float neutralVolume  = 1.0f;
-    public float playerVolume   = 1.0f;
-    public float ambientVolume  = 1.0f;
-    public float voiceVolume    = 1.0f;
+    public float masterVolume  = 1.0f;
+    public float musicVolume   = 1.0f;
+    public float weatherVolume = 1.0f;
+    public float hostileVolume = 1.0f;
+    public float neutralVolume = 1.0f;
+    public float ambientVolume = 1.0f;
+    public float voiceVolume   = 1.0f;
 
     // Video
     public float   brightness         = 0.5f;
@@ -39,24 +36,22 @@ public class MoreSettingsConfig {
     public boolean clouds             = true;
 
     // Chat
-    public float   chatOpacity     = 1.0f;
-    public float   chatScale       = 1.0f;
-    public float   chatWidth       = 1.0f;
-    public boolean chatVisibility  = true;
-    public boolean chatColors      = true;
-    public boolean chatLinks       = true;
+    public float   chatOpacity    = 1.0f;
+    public float   chatScale      = 1.0f;
+    public float   chatWidth      = 1.0f;
+    public boolean chatVisibility = true;
+    public boolean chatColors     = true;
+    public boolean chatLinks      = true;
 
     // Gameplay
     public boolean autoJump         = true;
     public boolean toggleSprint     = false;
     public boolean toggleCrouch     = false;
     public boolean reducedDebugInfo = false;
-    public boolean heldItemTooltips = true;
-    public boolean advancedTooltips = false;
 
     // Accessibility
-    public boolean subtitles       = false;
-    public boolean textBackground  = true;
+    public boolean subtitles      = false;
+    public boolean textBackground = true;
     public float   textBackgroundOp = 0.5f;
 
     private static MoreSettingsConfig instance;

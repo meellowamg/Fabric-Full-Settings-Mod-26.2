@@ -58,28 +58,25 @@ public class MoreSettingsCategoryScreen extends Screen {
     }
 
     private int buildSound(int cx, int y) {
-        y = slider(cx, y, "Master Volume",      config.masterVolume,  0f, 1f, v -> { config.masterVolume  = v; applySound(); });
-        y = slider(cx, y, "Music",              config.musicVolume,   0f, 1f, v -> { config.musicVolume   = v; applySound(); });
-        y = slider(cx, y, "Records",            config.recordVolume,  0f, 1f, v -> { config.recordVolume  = v; applySound(); });
-        y = slider(cx, y, "Weather",            config.weatherVolume, 0f, 1f, v -> { config.weatherVolume = v; applySound(); });
-        y = slider(cx, y, "Blocks",             config.blockVolume,   0f, 1f, v -> { config.blockVolume   = v; applySound(); });
-        y = slider(cx, y, "Hostile Mobs",       config.hostileVolume, 0f, 1f, v -> { config.hostileVolume = v; applySound(); });
-        y = slider(cx, y, "Neutral Mobs",       config.neutralVolume, 0f, 1f, v -> { config.neutralVolume = v; applySound(); });
-        y = slider(cx, y, "Players",            config.playerVolume,  0f, 1f, v -> { config.playerVolume  = v; applySound(); });
-        y = slider(cx, y, "Ambient",            config.ambientVolume, 0f, 1f, v -> { config.ambientVolume = v; applySound(); });
-        y = slider(cx, y, "Voice / Speech",     config.voiceVolume,   0f, 1f, v -> { config.voiceVolume   = v; applySound(); });
+        y = slider(cx, y, "Master Volume",  config.masterVolume,  0f, 1f, v -> { config.masterVolume  = v; applySound(); });
+        y = slider(cx, y, "Music",          config.musicVolume,   0f, 1f, v -> { config.musicVolume   = v; applySound(); });
+        y = slider(cx, y, "Weather",        config.weatherVolume, 0f, 1f, v -> { config.weatherVolume = v; applySound(); });
+        y = slider(cx, y, "Hostile Mobs",   config.hostileVolume, 0f, 1f, v -> { config.hostileVolume = v; applySound(); });
+        y = slider(cx, y, "Neutral Mobs",   config.neutralVolume, 0f, 1f, v -> { config.neutralVolume = v; applySound(); });
+        y = slider(cx, y, "Ambient",        config.ambientVolume, 0f, 1f, v -> { config.ambientVolume = v; applySound(); });
+        y = slider(cx, y, "Voice / Speech", config.voiceVolume,   0f, 1f, v -> { config.voiceVolume   = v; applySound(); });
         return y;
     }
 
     private int buildVideo(int cx, int y) {
-        y = slider(cx, y, "Brightness",         config.brightness,              0f,  1.5f, v -> { config.brightness         = v; applyVideo(); });
-        y = slider(cx, y, "FOV",                (config.fov - 30) / 80f,        0f,  1f,   v -> { config.fov                = (int)(30 + v * 80); applyVideo(); });
-        y = slider(cx, y, "Render Distance",    (config.renderDistance - 2) / 30f, 0f, 1f, v -> { config.renderDistance     = (int)(2 + v * 30); applyVideo(); });
-        y = slider(cx, y, "Simulation Distance",(config.simulationDistance-5)/27f, 0f, 1f, v -> { config.simulationDistance = (int)(5 + v * 27); applyVideo(); });
-        y = slider(cx, y, "Max Framerate",      (config.maxFramerate - 10) / 250f, 0f, 1f, v -> { config.maxFramerate       = (int)(10 + v * 250); applyVideo(); });
-        y = toggle(cx, y, "Fullscreen",         config.fullscreen, v -> { config.fullscreen = v; applyVideo(); });
-        y = toggle(cx, y, "VSync",              config.vsync,      v -> { config.vsync      = v; applyVideo(); });
-        y = toggle(cx, y, "Clouds",             config.clouds,     v -> { config.clouds     = v; applyVideo(); });
+        y = slider(cx, y, "Brightness",          config.brightness,               0f,  1.5f, v -> { config.brightness         = v; applyVideo(); });
+        y = slider(cx, y, "FOV",                 (config.fov - 30) / 80f,         0f,  1f,   v -> { config.fov                = (int)(30 + v * 80); applyVideo(); });
+        y = slider(cx, y, "Render Distance",     (config.renderDistance - 2) / 30f,  0f, 1f, v -> { config.renderDistance     = (int)(2 + v * 30); applyVideo(); });
+        y = slider(cx, y, "Simulation Distance", (config.simulationDistance-5)/27f,  0f, 1f, v -> { config.simulationDistance = (int)(5 + v * 27); applyVideo(); });
+        y = slider(cx, y, "Max Framerate",       (config.maxFramerate - 10) / 250f,  0f, 1f, v -> { config.maxFramerate       = (int)(10 + v * 250); applyVideo(); });
+        y = toggle(cx, y, "Fullscreen",          config.fullscreen, v -> { config.fullscreen = v; applyVideo(); });
+        y = toggle(cx, y, "VSync",               config.vsync,      v -> { config.vsync      = v; applyVideo(); });
+        y = toggle(cx, y, "Clouds",              config.clouds,     v -> { config.clouds     = v; applyVideo(); });
         return y;
     }
 
@@ -98,15 +95,13 @@ public class MoreSettingsCategoryScreen extends Screen {
         y = toggle(cx, y, "Toggle Sprint",      config.toggleSprint,     v -> { config.toggleSprint     = v; applyGameplay(); });
         y = toggle(cx, y, "Toggle Crouch",      config.toggleCrouch,     v -> { config.toggleCrouch     = v; applyGameplay(); });
         y = toggle(cx, y, "Reduced Debug Info", config.reducedDebugInfo, v -> { config.reducedDebugInfo = v; applyGameplay(); });
-        y = toggle(cx, y, "Held Item Tooltips", config.heldItemTooltips, v -> { config.heldItemTooltips = v; applyGameplay(); });
-        y = toggle(cx, y, "Advanced Tooltips",  config.advancedTooltips, v -> { config.advancedTooltips = v; applyGameplay(); });
         return y;
     }
 
     private int buildAccessibility(int cx, int y) {
-        y = toggle(cx, y, "Subtitles",            config.subtitles,      v -> { config.subtitles      = v; applyAccessibility(); });
-        y = toggle(cx, y, "Text Background",      config.textBackground, v -> { config.textBackground = v; applyAccessibility(); });
-        y = slider(cx, y, "Text Background Opacity", config.textBackgroundOp, 0f, 1f, v -> { config.textBackgroundOp = v; applyAccessibility(); });
+        y = toggle(cx, y, "Subtitles",               config.subtitles,      v -> { config.subtitles      = v; applyAccessibility(); });
+        y = toggle(cx, y, "Text Background",          config.textBackground, v -> { config.textBackground = v; applyAccessibility(); });
+        y = slider(cx, y, "Text Background Opacity",  config.textBackgroundOp, 0f, 1f, v -> { config.textBackgroundOp = v; applyAccessibility(); });
         return y;
     }
 
@@ -143,8 +138,7 @@ public class MoreSettingsCategoryScreen extends Screen {
     }
 
     private String fmt(float v, float min, float max) {
-        if (min == 0f && max == 1f) return Math.round(v * 100) + "%";
-        if (min == 0f && max == 1.5f) return Math.round(v * 100) + "%";
+        if (max <= 1.5f) return Math.round(v * 100) + "%";
         return String.valueOf(Math.round(v));
     }
 
@@ -152,15 +146,12 @@ public class MoreSettingsCategoryScreen extends Screen {
         Minecraft mc = Minecraft.getInstance();
         mc.options.getSoundSourceOptionInstance(SoundSource.MASTER).set((double) config.masterVolume);
         mc.options.getSoundSourceOptionInstance(SoundSource.MUSIC).set((double) config.musicVolume);
-        mc.options.getSoundSourceOptionInstance(SoundSource.RECORD).set((double) config.recordVolume);
         mc.options.getSoundSourceOptionInstance(SoundSource.WEATHER).set((double) config.weatherVolume);
-        mc.options.getSoundSourceOptionInstance(SoundSource.BLOCK).set((double) config.blockVolume);
         mc.options.getSoundSourceOptionInstance(SoundSource.HOSTILE).set((double) config.hostileVolume);
         mc.options.getSoundSourceOptionInstance(SoundSource.NEUTRAL).set((double) config.neutralVolume);
-        mc.options.getSoundSourceOptionInstance(SoundSource.PLAYER).set((double) config.playerVolume);
         mc.options.getSoundSourceOptionInstance(SoundSource.AMBIENT).set((double) config.ambientVolume);
         mc.options.getSoundSourceOptionInstance(SoundSource.VOICE).set((double) config.voiceVolume);
-        mc.soundManager.reload();
+        mc.options.save();
     }
 
     private void applyVideo() {
@@ -194,8 +185,6 @@ public class MoreSettingsCategoryScreen extends Screen {
         mc.options.toggleSprint().set(config.toggleSprint);
         mc.options.toggleCrouch().set(config.toggleCrouch);
         mc.options.reducedDebugInfo().set(config.reducedDebugInfo);
-        mc.options.heldItemTooltips().set(config.heldItemTooltips);
-        mc.options.advancedItemTooltips().set(config.advancedTooltips);
         mc.options.save();
     }
 

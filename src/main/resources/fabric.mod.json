@@ -3,7 +3,7 @@
 	"id": "moresettingsmod",
 	"version": "${version}",
 	"name": "More Settings Mod",
-	"description": "Adds a Full Settings menu to Minecraft with every setting organized and searchable.",
+	"description": "Adds a Full Settings menu with every Minecraft setting organized and searchable.",
 	"authors": [
 		"Meellowamg"
 	],
@@ -24,7 +24,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.19.3",
-		"minecraft": ">=26.2",
+		"minecraft": "~26.2",
 		"java": ">=21",
 		"fabric-api": "*"
 	}
