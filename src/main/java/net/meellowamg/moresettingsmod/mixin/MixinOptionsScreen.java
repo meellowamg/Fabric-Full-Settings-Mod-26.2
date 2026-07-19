@@ -6,7 +6,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-@Mixin(PauseScreen.class)
-public class MixinPauseScreen {
+@Mixin(targets = "net.minecraft.client.gui.screens.options.OptionsScreen")
+public class MixinOptionsScreen {
 
     @Shadow protected Minecraft minecraft;
     @Shadow protected int width;
@@ -35,7 +35,7 @@ public class MixinPauseScreen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
-        PauseScreen self = (PauseScreen)(Object)this;
+        Screen self = (Screen)(Object)this;
 
         int lowestY = height / 2;
         for (GuiEventListener child : children()) {
