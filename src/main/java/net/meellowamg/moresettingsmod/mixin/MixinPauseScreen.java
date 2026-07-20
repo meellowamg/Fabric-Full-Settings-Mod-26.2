@@ -14,19 +14,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
-
 @Mixin(PauseScreen.class)
 public class MixinPauseScreen {
 
     @Shadow protected Minecraft minecraft;
     @Shadow protected int width;
     @Shadow protected int height;
-
-    @Shadow
-    public List<? extends GuiEventListener> children() {
-        throw new AssertionError();
-    }
 
     @Shadow
     protected <T extends GuiEventListener & Renderable & NarratableEntry> T addRenderableWidget(T widget) {
@@ -36,18 +29,9 @@ public class MixinPauseScreen {
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
         PauseScreen self = (PauseScreen)(Object)this;
-
-        int lowestY = height / 2;
-        for (GuiEventListener child : children()) {
-            if (child instanceof Button btn) {
-                int btnBottom = btn.getY() + btn.getHeight();
-                if (btnBottom > lowestY) lowestY = btnBottom;
-            }
-        }
-
         addRenderableWidget(Button.builder(
                 Component.literal("Full Settings"),
                 btn -> minecraft.gui.setScreen(new MoreSettingsScreen(self))
-        ).bounds(width / 2 - 102, lowestY + 5, 204, 20).build());
+        ).bounds(width / 2 - 102, height / 4 + 155, 204, 20).build());
     }
 }
