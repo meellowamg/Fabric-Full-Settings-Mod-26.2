@@ -20,14 +20,15 @@ public class MixinPauseScreen {
 
     @Shadow protected int width;
     @Shadow protected int height;
+    @Shadow protected Minecraft minecraft;
 
     @Shadow
     protected <T extends GuiEventListener & Renderable & NarratableEntry> T addRenderableWidget(T widget) {
         throw new AssertionError();
     }
 
-    @Inject(method = "init(Lnet/minecraft/client/Minecraft;II)V", at = @At("TAIL"))
-    private void onInit(Minecraft minecraft, int width, int height, CallbackInfo ci) {
+    @Inject(method = "init()V", at = @At("TAIL"))
+    private void onInit(CallbackInfo ci) {
         if (!((Object)this instanceof PauseScreen)) return;
 
         addRenderableWidget(Button.builder(
