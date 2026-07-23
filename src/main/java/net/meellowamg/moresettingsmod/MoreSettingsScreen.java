@@ -23,18 +23,18 @@ public class MoreSettingsScreen extends Screen {
 
     private int scrollOffset = 0;
     private static final int SCROLL_AMOUNT = 15;
-    private static final int ROW_H = 22;
-    private static final int WIDGET_W = 300;
+    private static final int ROW_H = 24;
+    private static final int WIDGET_W = 320;
     private static final int WIDGET_H = 18;
-    private static final int TOP_MARGIN = 32;
+    private static final int TOP_MARGIN = 30;
     private static final int BOT_MARGIN = 28;
 
-    // Master list built once
     private final List<SettingEntry> allEntries  = new ArrayList<>();
     private final List<SettingEntry> shown       = new ArrayList<>();
+    private final List<SliderState>  sliderStates = new ArrayList<>();
 
-    // Parallel widget state — rebuilt only when search changes
-    private final List<SliderState> sliderStates = new ArrayList<>();
+    // Track which slider is being dragged
+    private int draggingSliderIndex = -1;
 
     public MoreSettingsScreen(Screen parent) {
         super(Component.literal("Full Settings"));
@@ -72,7 +72,29 @@ public class MoreSettingsScreen extends Screen {
         ).bounds(this.width / 2 - 50, this.height - 24, 100, 20).build());
 
         rebuildShown();
-        buildSliderStates();
+
+        // Add toggle buttons as real widgets for visible rows only
+        int cx = this.width / 2;
+        int visH = this.height - TOP_MARGIN - BOT_MARGIN;
+        for (int i = 0; i < shown.size(); i++) {
+            SettingEntry e = shown.get(i);
+            if (!e.isToggle) continue;
+            int y = TOP_MARGIN + i * ROW_H - scrollOffset;
+            if (y + ROW_H < TOP_MARGIN || y > TOP_MARGIN + visH) continue;
+            int wy = y + (ROW_H - WIDGET_H) / 2;
+            boolean cur = e.getValue.get() >= 0.5f;
+            final SettingEntry fe = e;
+            Button[] bArr = new Button[1];
+            bArr[0] = Button.builder(
+                    Component.literal(e.label + ": " + (cur ? "ON" : "OFF")),
+                    b -> {
+                        boolean nv = b.getMessage().getString().endsWith("OFF");
+                        b.setMessage(Component.literal(fe.label + ": " + (nv ? "ON" : "OFF")));
+                        fe.setValue.accept(nv ? 1f : 0f);
+                    }
+            ).bounds(cx - WIDGET_W / 2, wy, WIDGET_W, WIDGET_H).build();
+            this.addRenderableWidget(bArr[0]);
+        }
     }
 
     private void rebuildShown() {
@@ -104,65 +126,55 @@ public class MoreSettingsScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
-        // Full dark background
         g.fill(0, 0, this.width, this.height, 0xFF0D0D0D);
-
-        // Top bar
         g.fill(0, 0, this.width, TOP_MARGIN, 0xFF161616);
         g.fill(0, TOP_MARGIN - 1, this.width, TOP_MARGIN, 0xFF444444);
-        g.text(this.font, "Full Settings", this.width / 2, 7 + (TOP_MARGIN - 18) / 2 - this.font.lineHeight / 2, 0xFFFFFF, true);
-
-        // Bottom bar
+        g.text(this.font, "Full Settings", this.width / 2, (TOP_MARGIN - this.font.lineHeight) / 2, 0xFFFFFF, true);
         g.fill(0, this.height - BOT_MARGIN, this.width, this.height, 0xFF161616);
         g.fill(0, this.height - BOT_MARGIN, this.width, this.height - BOT_MARGIN + 1, 0xFF444444);
 
         int cx = this.width / 2;
         int visH = this.height - TOP_MARGIN - BOT_MARGIN;
 
-        // Clip and draw rows
         for (int i = 0; i < shown.size(); i++) {
             SettingEntry e = shown.get(i);
             int y = TOP_MARGIN + i * ROW_H - scrollOffset;
             if (y + ROW_H < TOP_MARGIN || y > TOP_MARGIN + visH) continue;
 
             if (e.isHeader) {
-                // Header row
                 g.fill(0, y, this.width, y + ROW_H, 0xFF1C1C1C);
                 g.fill(0, y, 3, y + ROW_H, 0xFFFFAA00);
                 g.text(this.font, e.label, cx, y + (ROW_H - this.font.lineHeight) / 2, 0xFFAA00, true);
             } else if (e.isSlider) {
-                // Draw slider manually
                 SliderState ss = sliderStates.get(i);
                 if (ss != null) {
                     int wx = cx - WIDGET_W / 2;
                     int wy = y + (ROW_H - WIDGET_H) / 2;
-                    // Track
-                    g.fill(wx, wy, wx + WIDGET_W, wy + WIDGET_H, 0xFF333333);
+                    // Track bg
+                    g.fill(wx, wy, wx + WIDGET_W, wy + WIDGET_H, 0xFF555555);
                     g.fill(wx + 1, wy + 1, wx + WIDGET_W - 1, wy + WIDGET_H - 1, 0xFF222222);
                     // Fill
                     int fillW = (int)(ss.value * (WIDGET_W - 8));
-                    g.fill(wx + 4, wy + 4, wx + 4 + fillW, wy + WIDGET_H - 4, 0xFF5555AA);
+                    if (fillW > 0)
+                        g.fill(wx + 4, wy + 3, wx + 4 + fillW, wy + WIDGET_H - 3, 0xFF5577CC);
                     // Handle
                     int hx = wx + (int)(ss.value * (WIDGET_W - 8));
-                    g.fill(hx, wy, hx + 8, wy + WIDGET_H, 0xFFAAAAAA);
-                    // Label
+                    g.fill(hx, wy, hx + 8, wy + WIDGET_H, 0xFFBBBBBB);
+                    // Text
                     float val = (float)(e.min + ss.value * (e.max - e.min));
                     String text = e.label + ": " + e.formatValue(val);
                     g.text(this.font, text, cx, wy + (WIDGET_H - this.font.lineHeight) / 2, 0xFFFFFF, true);
                 }
-            } else if (!e.isToggle) {
-                // Plain info row (shouldn't exist but just in case)
-                g.text(this.font, e.label, cx, y + (ROW_H - this.font.lineHeight) / 2, 0xCCCCCC, true);
             }
-            // Toggle buttons are rendered by super
+            // Toggles rendered by super
         }
 
-        // Scroll indicator
+        // Scrollbar
         int totalH = shown.size() * ROW_H;
         if (totalH > visH) {
-            int trackH = visH;
-            int thumbH = Math.max(20, (int)((float) visH / totalH * trackH));
-            int thumbY = TOP_MARGIN + (int)((float) scrollOffset / (totalH - visH) * (trackH - thumbH));
+            int thumbH = Math.max(20, (int)((float) visH / totalH * visH));
+            int maxScroll = totalH - visH;
+            int thumbY = TOP_MARGIN + (maxScroll > 0 ? (int)((float) scrollOffset / maxScroll * (visH - thumbH)) : 0);
             g.fill(this.width - 4, TOP_MARGIN, this.width, TOP_MARGIN + visH, 0xFF222222);
             g.fill(this.width - 4, thumbY, this.width, thumbY + thumbH, 0xFF888888);
         }
@@ -171,11 +183,21 @@ public class MoreSettingsScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // Handle slider clicks
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        // Don't scroll if over search box
+        if (mouseY < TOP_MARGIN) return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        int totalH = shown.size() * ROW_H;
+        int visH = this.height - TOP_MARGIN - BOT_MARGIN;
+        int maxScroll = Math.max(0, totalH - visH);
+        scrollOffset = (int) Math.max(0, Math.min(maxScroll, scrollOffset - scrollY * SCROLL_AMOUNT));
+        // Rebuild toggle widgets for new scroll position
+        init();
+        return true;
+    }
+
+    private int getSliderIndexAt(double mouseX, double mouseY) {
         int cx = this.width / 2;
         int visH = this.height - TOP_MARGIN - BOT_MARGIN;
-
         for (int i = 0; i < shown.size(); i++) {
             SettingEntry e = shown.get(i);
             if (!e.isSlider) continue;
@@ -184,99 +206,94 @@ public class MoreSettingsScreen extends Screen {
             int wx = cx - WIDGET_W / 2;
             int wy = y + (ROW_H - WIDGET_H) / 2;
             if (mouseX >= wx && mouseX <= wx + WIDGET_W && mouseY >= wy && mouseY <= wy + WIDGET_H) {
-                SliderState ss = sliderStates.get(i);
-                if (ss != null) {
-                    double newVal = Math.max(0, Math.min(1, (mouseX - wx) / WIDGET_W));
-                    ss.value = newVal;
-                    float realVal = (float)(e.min + newVal * (e.max - e.min));
-                    e.setValue.accept(realVal);
-                    return true;
-                }
+                return i;
             }
         }
+        return -1;
+    }
+
+    private void applySliderAt(int index, double mouseX) {
+        int cx = this.width / 2;
+        int wx = cx - WIDGET_W / 2;
+        SliderState ss = sliderStates.get(index);
+        SettingEntry e = shown.get(index);
+        if (ss != null) {
+            double newVal = Math.max(0, Math.min(1, (mouseX - wx) / WIDGET_W));
+            ss.value = newVal;
+            e.setValue.accept((float)(e.min + newVal * (e.max - e.min)));
+        }
+    }
+
+    // 26.2 mouse API — these are the correct signatures
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        int idx = getSliderIndexAt(mouseX, mouseY);
+        if (idx >= 0) {
+            draggingSliderIndex = idx;
+            applySliderAt(idx, mouseX);
+            return true;
+        }
+        draggingSliderIndex = -1;
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        int cx = this.width / 2;
-        int visH = this.height - TOP_MARGIN - BOT_MARGIN;
-
-        for (int i = 0; i < shown.size(); i++) {
-            SettingEntry e = shown.get(i);
-            if (!e.isSlider) continue;
-            int y = TOP_MARGIN + i * ROW_H - scrollOffset;
-            if (y + ROW_H < TOP_MARGIN || y > TOP_MARGIN + visH) continue;
-            int wx = cx - WIDGET_W / 2;
-            int wy = y + (ROW_H - WIDGET_H) / 2;
-            if (mouseY >= wy && mouseY <= wy + WIDGET_H) {
-                SliderState ss = sliderStates.get(i);
-                if (ss != null) {
-                    double newVal = Math.max(0, Math.min(1, (mouseX - wx) / WIDGET_W));
-                    ss.value = newVal;
-                    float realVal = (float)(e.min + newVal * (e.max - e.min));
-                    e.setValue.accept(realVal);
-                    return true;
-                }
-            }
-        }
-        return super.mouseDragged(mouseX, mouseY, button, dx, dy);
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        draggingSliderIndex = -1;
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        int totalH = shown.size() * ROW_H;
-        int visH = this.height - TOP_MARGIN - BOT_MARGIN;
-        int maxScroll = Math.max(0, totalH - visH);
-        scrollOffset = (int) Math.max(0, Math.min(maxScroll, scrollOffset - scrollY * SCROLL_AMOUNT));
-        return true;
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (draggingSliderIndex >= 0) {
+            applySliderAt(draggingSliderIndex, mouseX);
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     private void buildAllEntries() {
         allEntries.clear();
 
-        // ==================== SOUND ====================
+        // ==================== SOUND - EVERY SOUND SOURCE ====================
         allEntries.add(SettingEntry.header("SOUND"));
         allEntries.add(SettingEntry.slider("Master Volume",
                 0f, 1f, true, () -> config.masterVolume, v -> config.masterVolume = v));
-        allEntries.add(SettingEntry.slider("Music",
+        allEntries.add(SettingEntry.slider("Music (Background Music)",
                 0f, 1f, true, () -> config.musicVolume, v -> config.musicVolume = v));
-        allEntries.add(SettingEntry.slider("Weather (Rain, Thunder)",
+        allEntries.add(SettingEntry.slider("Weather (Rain, Thunder, Storm)",
                 0f, 1f, true, () -> config.weatherVolume, v -> config.weatherVolume = v));
-        allEntries.add(SettingEntry.slider("Hostile Mobs (Zombies, Skeletons, etc.)",
+        allEntries.add(SettingEntry.slider("Hostile Mobs (Zombies, Skeletons, Creepers, Spiders, etc.)",
                 0f, 1f, true, () -> config.hostileVolume, v -> config.hostileVolume = v));
-        allEntries.add(SettingEntry.slider("Neutral Mobs (Pigs, Cows, etc.)",
+        allEntries.add(SettingEntry.slider("Neutral Mobs (Pigs, Cows, Sheep, Chickens, Horses, etc.)",
                 0f, 1f, true, () -> config.neutralVolume, v -> config.neutralVolume = v));
-        allEntries.add(SettingEntry.slider("Ambient / Environment",
+        allEntries.add(SettingEntry.slider("Ambient / Environment (Cave sounds, Water, Lava, etc.)",
                 0f, 1f, true, () -> config.ambientVolume, v -> config.ambientVolume = v));
-        allEntries.add(SettingEntry.slider("Voice / Speech",
+        allEntries.add(SettingEntry.slider("Voice / Speech (Villagers, Narrator, etc.)",
                 0f, 1f, true, () -> config.voiceVolume, v -> config.voiceVolume = v));
 
         // ==================== VIDEO ====================
         allEntries.add(SettingEntry.header("VIDEO"));
         allEntries.add(SettingEntry.slider("Brightness",
                 0f, 1.5f, true, () -> config.brightness, v -> config.brightness = v));
-        allEntries.add(SettingEntry.slider("Field of View (FOV)",
-                30f, 110f, false, () -> config.fov, v -> config.fov = Math.round(v)));
+        allEntries.add(SettingEntry.slider("Field of View / FOV",
+                30f, 110f, false, () -> (float) config.fov, v -> config.fov = Math.round(v)));
         allEntries.add(SettingEntry.slider("Render Distance (chunks)",
-                2f, 32f, false, () -> config.renderDistance, v -> config.renderDistance = Math.round(v)));
+                2f, 32f, false, () -> (float) config.renderDistance, v -> config.renderDistance = Math.round(v)));
         allEntries.add(SettingEntry.slider("Simulation Distance (chunks)",
-                5f, 32f, false, () -> config.simulationDistance, v -> config.simulationDistance = Math.round(v)));
-        allEntries.add(SettingEntry.slider("Max Framerate (fps)",
-                10f, 260f, false, () -> config.maxFramerate, v -> config.maxFramerate = Math.round(v)));
-        allEntries.add(SettingEntry.slider("GUI Scale (0 = auto)",
-                0f, 4f, false, () -> config.guiScale, v -> config.guiScale = Math.round(v)));
-        allEntries.add(SettingEntry.slider("Mipmap Levels",
-                0f, 4f, false, () -> config.mipmapLevels, v -> config.mipmapLevels = Math.round(v)));
+                5f, 32f, false, () -> (float) config.simulationDistance, v -> config.simulationDistance = Math.round(v)));
+        allEntries.add(SettingEntry.slider("Max Framerate (fps, 260 = unlimited)",
+                10f, 260f, false, () -> (float) config.maxFramerate, v -> config.maxFramerate = Math.round(v)));
+        allEntries.add(SettingEntry.slider("GUI Scale (0 = auto, 1-4)",
+                0f, 4f, false, () -> (float) config.guiScale, v -> config.guiScale = Math.round(v)));
+        allEntries.add(SettingEntry.slider("Mipmap Levels (texture quality, 0-4)",
+                0f, 4f, false, () -> (float) config.mipmapLevels, v -> config.mipmapLevels = Math.round(v)));
         allEntries.add(SettingEntry.toggle("Fullscreen",
                 () -> config.fullscreen ? 1f : 0f, v -> config.fullscreen = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("VSync",
+        allEntries.add(SettingEntry.toggle("VSync (cap fps to monitor refresh)",
                 () -> config.vsync ? 1f : 0f, v -> config.vsync = v >= 0.5f));
         allEntries.add(SettingEntry.toggle("Clouds",
                 () -> config.clouds ? 1f : 0f, v -> config.clouds = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("View Bobbing",
+        allEntries.add(SettingEntry.toggle("View Bobbing (camera sways when walking)",
                 () -> config.bobView ? 1f : 0f, v -> config.bobView = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Entity Shadows",
+        allEntries.add(SettingEntry.toggle("Entity Shadows (shadow under entities)",
                 () -> config.entityShadows ? 1f : 0f, v -> config.entityShadows = v >= 0.5f));
         allEntries.add(SettingEntry.toggle("Smooth Lighting",
                 () -> config.smoothLighting ? 1f : 0f, v -> config.smoothLighting = v >= 0.5f));
@@ -289,9 +306,9 @@ public class MoreSettingsScreen extends Screen {
                 0.01f, 10f, false, () -> config.mouseWheelSensitivity, v -> config.mouseWheelSensitivity = v));
         allEntries.add(SettingEntry.toggle("Invert Mouse Y-Axis",
                 () -> config.invertYAxis ? 1f : 0f, v -> config.invertYAxis = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Discrete Scrolling",
+        allEntries.add(SettingEntry.toggle("Discrete Scrolling (click-by-click scroll)",
                 () -> config.discreteScrolling ? 1f : 0f, v -> config.discreteScrolling = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Raw Mouse Input",
+        allEntries.add(SettingEntry.toggle("Raw Mouse Input (bypass OS acceleration)",
                 () -> config.rawMouseInput ? 1f : 0f, v -> config.rawMouseInput = v >= 0.5f));
         allEntries.add(SettingEntry.toggle("Touchscreen Mode",
                 () -> config.touchscreen ? 1f : 0f, v -> config.touchscreen = v >= 0.5f));
@@ -300,39 +317,39 @@ public class MoreSettingsScreen extends Screen {
         allEntries.add(SettingEntry.header("CHAT"));
         allEntries.add(SettingEntry.slider("Chat Opacity",
                 0f, 1f, true, () -> config.chatOpacity, v -> config.chatOpacity = v));
-        allEntries.add(SettingEntry.slider("Chat Scale",
+        allEntries.add(SettingEntry.slider("Chat Text Scale",
                 0.4f, 1f, true, () -> config.chatScale, v -> config.chatScale = v));
-        allEntries.add(SettingEntry.slider("Chat Width",
+        allEntries.add(SettingEntry.slider("Chat Window Width",
                 0f, 1f, true, () -> config.chatWidth, v -> config.chatWidth = v));
         allEntries.add(SettingEntry.slider("Chat Line Spacing",
                 0f, 1f, true, () -> config.chatLineSpacing, v -> config.chatLineSpacing = v));
-        allEntries.add(SettingEntry.slider("Chat Delay (seconds)",
+        allEntries.add(SettingEntry.slider("Chat Message Delay (seconds)",
                 0f, 6f, false, () -> config.chatDelay, v -> config.chatDelay = v));
         allEntries.add(SettingEntry.toggle("Chat Visible",
                 () -> config.chatVisibility ? 1f : 0f, v -> config.chatVisibility = v >= 0.5f));
         allEntries.add(SettingEntry.toggle("Chat Colors",
                 () -> config.chatColors ? 1f : 0f, v -> config.chatColors = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Chat Links",
+        allEntries.add(SettingEntry.toggle("Clickable Chat Links",
                 () -> config.chatLinks ? 1f : 0f, v -> config.chatLinks = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Prompt on Chat Links",
+        allEntries.add(SettingEntry.toggle("Prompt Before Opening Links",
                 () -> config.chatLinksPrompt ? 1f : 0f, v -> config.chatLinksPrompt = v >= 0.5f));
 
         // ==================== GAMEPLAY ====================
         allEntries.add(SettingEntry.header("GAMEPLAY"));
         allEntries.add(SettingEntry.toggle("Auto Jump",
                 () -> config.autoJump ? 1f : 0f, v -> config.autoJump = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Toggle Sprint",
+        allEntries.add(SettingEntry.toggle("Toggle Sprint (hold vs press once)",
                 () -> config.toggleSprint ? 1f : 0f, v -> config.toggleSprint = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Toggle Crouch",
+        allEntries.add(SettingEntry.toggle("Toggle Crouch (hold vs press once)",
                 () -> config.toggleCrouch ? 1f : 0f, v -> config.toggleCrouch = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Reduced Debug Info (F3)",
+        allEntries.add(SettingEntry.toggle("Reduced Debug Info (less info on F3)",
                 () -> config.reducedDebugInfo ? 1f : 0f, v -> config.reducedDebugInfo = v >= 0.5f));
 
         // ==================== ACCESSIBILITY ====================
         allEntries.add(SettingEntry.header("ACCESSIBILITY"));
-        allEntries.add(SettingEntry.toggle("Subtitles",
+        allEntries.add(SettingEntry.toggle("Subtitles (show sound captions)",
                 () -> config.subtitles ? 1f : 0f, v -> config.subtitles = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Text Background",
+        allEntries.add(SettingEntry.toggle("Text Background (behind chat text)",
                 () -> config.textBackground ? 1f : 0f, v -> config.textBackground = v >= 0.5f));
         allEntries.add(SettingEntry.slider("Text Background Opacity",
                 0f, 1f, true, () -> config.textBackgroundOp, v -> config.textBackgroundOp = v));
@@ -340,24 +357,24 @@ public class MoreSettingsScreen extends Screen {
                 () -> config.highContrast ? 1f : 0f, v -> config.highContrast = v >= 0.5f));
         allEntries.add(SettingEntry.toggle("Hide Lightning Flashes",
                 () -> config.hideLightningFlash ? 1f : 0f, v -> config.hideLightningFlash = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Dark Mojang Screen",
+        allEntries.add(SettingEntry.toggle("Dark Mojang Loading Screen",
                 () -> config.darkMojangScreen ? 1f : 0f, v -> config.darkMojangScreen = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Monochrome Logo",
+        allEntries.add(SettingEntry.toggle("Monochrome Mojang Logo",
                 () -> config.monochromeLogo ? 1f : 0f, v -> config.monochromeLogo = v >= 0.5f));
         allEntries.add(SettingEntry.slider("Damage Tilt Intensity",
                 0f, 1f, true, () -> config.damageTilt, v -> config.damageTilt = v));
-        allEntries.add(SettingEntry.slider("Glint Speed",
+        allEntries.add(SettingEntry.slider("Enchantment Glint Speed",
                 0f, 1f, true, () -> config.glintSpeed, v -> config.glintSpeed = v));
-        allEntries.add(SettingEntry.slider("Glint Strength",
+        allEntries.add(SettingEntry.slider("Enchantment Glint Strength",
                 0f, 1f, true, () -> config.glintStrength, v -> config.glintStrength = v));
-        allEntries.add(SettingEntry.slider("Panorama Scroll Speed",
+        allEntries.add(SettingEntry.slider("Panorama Background Scroll Speed",
                 0f, 1f, true, () -> config.panoramaSpeed, v -> config.panoramaSpeed = v));
 
         // ==================== SKIN LAYERS ====================
         allEntries.add(SettingEntry.header("SKIN LAYERS"));
         allEntries.add(SettingEntry.toggle("Show Cape",
                 () -> config.showCape ? 1f : 0f, v -> config.showCape = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Show Jacket",
+        allEntries.add(SettingEntry.toggle("Show Jacket (outer body layer)",
                 () -> config.showJacket ? 1f : 0f, v -> config.showJacket = v >= 0.5f));
         allEntries.add(SettingEntry.toggle("Show Left Sleeve",
                 () -> config.showLeftSleeve ? 1f : 0f, v -> config.showLeftSleeve = v >= 0.5f));
@@ -367,7 +384,7 @@ public class MoreSettingsScreen extends Screen {
                 () -> config.showLeftPants ? 1f : 0f, v -> config.showLeftPants = v >= 0.5f));
         allEntries.add(SettingEntry.toggle("Show Right Pants",
                 () -> config.showRightPants ? 1f : 0f, v -> config.showRightPants = v >= 0.5f));
-        allEntries.add(SettingEntry.toggle("Show Hat",
+        allEntries.add(SettingEntry.toggle("Show Hat (outer head layer)",
                 () -> config.showHat ? 1f : 0f, v -> config.showHat = v >= 0.5f));
     }
 
@@ -408,12 +425,6 @@ public class MoreSettingsScreen extends Screen {
 
         mc.options.showSubtitles().set(config.subtitles);
         mc.options.backgroundForChatOnly().set(!config.textBackground);
-
-        mc.options.mouseSensitivity().set((double) config.mouseSensitivity);
-        mc.options.invertYMouse().set(config.invertYAxis);
-        mc.options.discreteMouseScroll().set(config.discreteScrolling);
-        mc.options.touchscreen().set(config.touchscreen);
-        mc.options.rawMouseInput().set(config.rawMouseInput);
 
         mc.options.save();
     }
@@ -463,7 +474,7 @@ public class MoreSettingsScreen extends Screen {
 
         String formatValue(float v) {
             if (isPercent) return Math.round(v * 100) + "%";
-            if (max - min <= 10 && (v != Math.floor(v)))
+            if (max - min <= 10 && v != Math.floor(v))
                 return String.format("%.2f", v);
             return String.valueOf(Math.round(v));
         }
