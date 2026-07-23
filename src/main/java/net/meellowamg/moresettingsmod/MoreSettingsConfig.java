@@ -16,16 +16,16 @@ public class MoreSettingsConfig {
     private static final Path CONFIG_PATH = FabricLoader.getInstance()
             .getConfigDir().resolve("moresettingsmod.json");
 
-    // Sound
-    public float masterVolume  = 1.0f;
-    public float musicVolume   = 1.0f;
-    public float weatherVolume = 1.0f;
-    public float hostileVolume = 1.0f;
-    public float neutralVolume = 1.0f;
-    public float ambientVolume = 1.0f;
-    public float voiceVolume   = 1.0f;
+    // ===== SOUND =====
+    public float masterVolume   = 1.0f;
+    public float musicVolume    = 1.0f;
+    public float weatherVolume  = 1.0f;
+    public float hostileVolume  = 1.0f;
+    public float neutralVolume  = 1.0f;
+    public float ambientVolume  = 1.0f;
+    public float voiceVolume    = 1.0f;
 
-    // Video
+    // ===== VIDEO =====
     public float   brightness         = 0.5f;
     public int     fov                = 70;
     public int     renderDistance     = 12;
@@ -34,25 +34,64 @@ public class MoreSettingsConfig {
     public boolean fullscreen         = false;
     public boolean vsync              = true;
     public boolean clouds             = true;
+    public int     guiScale           = 0; // 0 = auto
+    public boolean bobView            = true;
+    public boolean highContrastBlocks = false;
+    public boolean entityShadows      = true;
+    public boolean particles          = true; // true=all
+    public boolean smoothLighting     = true;
+    public int     mipmapLevels       = 4;
 
-    // Chat
-    public float   chatOpacity    = 1.0f;
-    public float   chatScale      = 1.0f;
-    public float   chatWidth      = 1.0f;
-    public boolean chatVisibility = true;
-    public boolean chatColors     = true;
-    public boolean chatLinks      = true;
+    // ===== CHAT =====
+    public float   chatOpacity      = 1.0f;
+    public float   chatScale        = 1.0f;
+    public float   chatWidth        = 1.0f;
+    public float   chatLineSpacing  = 0.0f;
+    public float   chatDelay        = 0.0f;
+    public boolean chatVisibility   = true;
+    public boolean chatColors       = true;
+    public boolean chatLinks        = true;
+    public boolean chatLinksPrompt  = true;
 
-    // Gameplay
-    public boolean autoJump         = true;
-    public boolean toggleSprint     = false;
-    public boolean toggleCrouch     = false;
-    public boolean reducedDebugInfo = false;
+    // ===== GAMEPLAY =====
+    public boolean autoJump          = true;
+    public boolean toggleSprint      = false;
+    public boolean toggleCrouch      = false;
+    public boolean reducedDebugInfo  = false;
+    public boolean showSubtitlesInGame = false;
+    public boolean sneakToggle       = false;
+    public boolean operatorTabList   = false;
 
-    // Accessibility
-    public boolean subtitles      = false;
-    public boolean textBackground = true;
-    public float   textBackgroundOp = 0.5f;
+    // ===== ACCESSIBILITY =====
+    public boolean subtitles         = false;
+    public boolean textBackground    = true;
+    public float   textBackgroundOp  = 0.5f;
+    public boolean highContrast      = false;
+    public boolean darkMojangScreen  = false;
+    public boolean hideLightningFlash = false;
+    public float   damageTilt        = 1.0f;
+    public float   panoramaSpeed     = 1.0f;
+    public boolean monochromeLogo    = false;
+    public float   glintSpeed        = 0.5f;
+    public float   glintStrength     = 0.75f;
+    public boolean narratorEnabled   = false;
+
+    // ===== MOUSE =====
+    public float   mouseSensitivity  = 0.5f;
+    public boolean invertYAxis       = false;
+    public boolean discreteScrolling = false;
+    public boolean touchscreen       = false;
+    public float   mouseWheelSensitivity = 1.0f;
+    public boolean rawMouseInput     = true;
+
+    // ===== SKINS =====
+    public boolean showCape          = true;
+    public boolean showJacket        = true;
+    public boolean showLeftSleeve    = true;
+    public boolean showRightSleeve   = true;
+    public boolean showLeftPants     = true;
+    public boolean showRightPants    = true;
+    public boolean showHat           = true;
 
     private static MoreSettingsConfig instance;
 

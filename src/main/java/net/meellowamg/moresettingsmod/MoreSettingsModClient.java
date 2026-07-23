@@ -20,8 +20,8 @@ public class MoreSettingsModClient implements ClientModInitializer {
         ScreenEvents.AFTER_INIT.register((Minecraft client, Screen screen, int scaledWidth, int scaledHeight) -> {
             if (!(screen instanceof OptionsScreen)) return;
 
-            // Place button below the Done button
-            int buttonY = scaledHeight - 27;
+            // Place Full Settings button ABOVE the Done button
+            int buttonY = scaledHeight - 50;
 
             Button btn = Button.builder(
                     Component.literal("Full Settings"),
