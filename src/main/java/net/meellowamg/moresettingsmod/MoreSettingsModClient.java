@@ -2,12 +2,13 @@ package net.meellowamg.moresettingsmod;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.network.chat.Component;
+
+import java.lang.reflect.Method;
 
 public class MoreSettingsModClient implements ClientModInitializer {
 
@@ -16,27 +17,24 @@ public class MoreSettingsModClient implements ClientModInitializer {
         MoreSettingsMod.LOGGER.info("More Settings Mod Client Loaded!");
         MoreSettingsConfig.load();
 
-        ScreenEvents.AFTER_INIT.register(new ScreenEvents.AfterInit() {
-            @Override
-            public void afterInit(Minecraft client, Screen screen, int scaledWidth, int scaledHeight) {
-                if (!(screen instanceof PauseScreen)) return;
+        ScreenEvents.AFTER_INIT.register((Minecraft client, Screen screen, int scaledWidth, int scaledHeight) -> {
+            if (!(screen instanceof OptionsScreen)) return;
 
-                int buttonY = scaledHeight / 4 + 160;
+            // Place button below the Done button
+            int buttonY = scaledHeight - 27;
 
-                Button fullSettingsButton = Button.builder(
-                        Component.literal("Full Settings"),
-                        btn -> client.gui.setScreen(new MoreSettingsScreen(screen))
-                ).bounds(scaledWidth / 2 - 102, buttonY, 204, 20).build();
+            Button btn = Button.builder(
+                    Component.literal("Full Settings"),
+                    b -> client.gui.setScreen(new MoreSettingsScreen(screen))
+            ).bounds(scaledWidth / 2 - 102, buttonY, 204, 20).build();
 
-                // Use reflection to call addRenderableWidget
-                try {
-                    var method = Screen.class.getDeclaredMethod("addRenderableWidget",
-                            net.minecraft.client.gui.components.events.GuiEventListener.class);
-                    method.setAccessible(true);
-                    method.invoke(screen, fullSettingsButton);
-                } catch (Exception e) {
-                    MoreSettingsMod.LOGGER.error("Failed to add Full Settings button", e);
-                }
+            try {
+                Method method = Screen.class.getDeclaredMethod("addRenderableWidget",
+                        net.minecraft.client.gui.components.events.GuiEventListener.class);
+                method.setAccessible(true);
+                method.invoke(screen, btn);
+            } catch (Exception e) {
+                MoreSettingsMod.LOGGER.error("Failed to add Full Settings button: " + e.getMessage());
             }
         });
     }
